@@ -111,6 +111,37 @@
             margin-top: 12px;
             font-size: 12px;
             color: #64748b;
+            line-height: 1.55;
+        }
+
+        .kpi-heading-row {
+            display:block;
+        }
+
+        .bus-trend-badge {
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            margin-top:-3px;
+            margin-bottom:10px;
+            padding:5px 8px;
+            border-radius:999px;
+            background:#eef2ff;
+            color:#4338ca;
+            font-size:10px;
+            font-weight:700;
+            white-space:nowrap;
+        }
+
+        .delta-card .kpi-title {
+            color:#0f766e;
+        }
+
+        .delta-description {
+            margin-top:8px;
+            color:#64748b;
+            font-size:11px;
+            line-height:1.45;
         }
 
 
@@ -445,6 +476,7 @@
         .kpi-card:nth-child(4)::after { background:#f59e0b; }
         .kpi-card:nth-child(5)::after { background:#10b981; }
         .kpi-card:nth-child(6)::after { background:#0ea5e9; }
+        .kpi-card:nth-child(7)::after { background:#14b8a6; }
 
         .trend-header h2, .correlation-header h2 { letter-spacing:-.02em; }
         .chart-box {
@@ -569,14 +601,14 @@
                             <p class="threshold-help">Define los límites para generar los semáforos y eventos. Puedes dejar cualquier variable sin configurar.</p>
                             <div class="threshold-grid">
                                 <div class="th variable-header">Variable</div><div class="th">Advertencia</div><div class="th">Crítico</div>
-                                <div class="variable-name">Corriente (A)</div><input type="number" step="any" name="umbrales[corriente][advertencia]" placeholder="Advertencia"><input type="number" step="any" name="umbrales[corriente][critico]" placeholder="Crítico">
-                                <div class="variable-name">Bus DC (V)</div><input type="number" step="any" name="umbrales[bus_dc][advertencia]" placeholder="Advertencia"><input type="number" step="any" name="umbrales[bus_dc][critico]" placeholder="Crítico">
-                                <div class="variable-name">Torque (%)</div><input type="number" step="any" name="umbrales[torque][advertencia]" placeholder="Advertencia"><input type="number" step="any" name="umbrales[torque][critico]" placeholder="Crítico">
-                                <div class="variable-name">Temp. inversor (%)</div><input type="number" step="any" name="umbrales[temp_inversor][advertencia]" placeholder="Advertencia"><input type="number" step="any" name="umbrales[temp_inversor][critico]" placeholder="Crítico">
-                                <div class="variable-name">Temp. ambiente (°C)</div><input type="number" step="any" name="umbrales[temp_ambiente][advertencia]" placeholder="Advertencia"><input type="number" step="any" name="umbrales[temp_ambiente][critico]" placeholder="Crítico">
-                                <div class="variable-name">Velocidad (rpm)</div><input type="number" step="any" name="umbrales[velocidad][advertencia]" placeholder="Advertencia"><input type="number" step="any" name="umbrales[velocidad][critico]" placeholder="Crítico">
+                                <div class="variable-name">Corriente (A)</div><input type="number" step="any" name="umbrales[corriente][advertencia]" value="{{ old('umbrales.corriente.advertencia', session('umbrales_monitoreo.corriente.advertencia')) }}" placeholder="Advertencia"><input type="number" step="any" name="umbrales[corriente][critico]" value="{{ old('umbrales.corriente.critico', session('umbrales_monitoreo.corriente.critico')) }}" placeholder="Crítico">
+                                <div class="variable-name">Bus DC (V)</div><input type="number" step="any" name="umbrales[bus_dc][advertencia]" value="{{ old('umbrales.bus_dc.advertencia', session('umbrales_monitoreo.bus_dc.advertencia')) }}" placeholder="Advertencia"><input type="number" step="any" name="umbrales[bus_dc][critico]" value="{{ old('umbrales.bus_dc.critico', session('umbrales_monitoreo.bus_dc.critico')) }}" placeholder="Crítico">
+                                <div class="variable-name">Torque (%)</div><input type="number" step="any" name="umbrales[torque][advertencia]" value="{{ old('umbrales.torque.advertencia', session('umbrales_monitoreo.torque.advertencia')) }}" placeholder="Advertencia"><input type="number" step="any" name="umbrales[torque][critico]" value="{{ old('umbrales.torque.critico', session('umbrales_monitoreo.torque.critico')) }}" placeholder="Crítico">
+                                <div class="variable-name">Temp. inversor (%)</div><input type="number" step="any" name="umbrales[temp_inversor][advertencia]" value="{{ old('umbrales.temp_inversor.advertencia', session('umbrales_monitoreo.temp_inversor.advertencia')) }}" placeholder="Advertencia"><input type="number" step="any" name="umbrales[temp_inversor][critico]" value="{{ old('umbrales.temp_inversor.critico', session('umbrales_monitoreo.temp_inversor.critico')) }}" placeholder="Crítico">
+                                <div class="variable-name">Temp. ambiente (°C)</div><input type="number" step="any" name="umbrales[temp_ambiente][advertencia]" value="{{ old('umbrales.temp_ambiente.advertencia', session('umbrales_monitoreo.temp_ambiente.advertencia')) }}" placeholder="Advertencia"><input type="number" step="any" name="umbrales[temp_ambiente][critico]" value="{{ old('umbrales.temp_ambiente.critico', session('umbrales_monitoreo.temp_ambiente.critico')) }}" placeholder="Crítico">
+                                <div class="variable-name">Velocidad (rpm)</div><input type="number" step="any" name="umbrales[velocidad][advertencia]" value="{{ old('umbrales.velocidad.advertencia', session('umbrales_monitoreo.velocidad.advertencia')) }}" placeholder="Advertencia"><input type="number" step="any" name="umbrales[velocidad][critico]" value="{{ old('umbrales.velocidad.critico', session('umbrales_monitoreo.velocidad.critico')) }}" placeholder="Crítico">
                             </div>
-                            <div class="threshold-note">Menor a Advertencia = Normal · Desde Advertencia = Advertencia · Desde Crítico = Crítico.</div>
+                            <div class="threshold-note">Puedes configurar solo Advertencia, solo Crítico o ambos. En las variables generales, valores mayores elevan el nivel. En Bus DC la lógica es inversa: valores menores elevan el nivel (ejemplo: Advertencia 500 V y Crítico 300 V).</div>
                         </div>
                     </details>
 
@@ -687,12 +719,28 @@
                             |
                             Max:
                             {{ number_format($kpis['corriente']['maximo'], 2) }}
+                            |
+                            Desv.:
+                            {{ number_format($kpis['corriente']['desviacion'], 2) }}
                         </div>
                     </div>
 
                     {{-- BUS DC --}}
                     <div class="kpi-card">
-                        <span class="kpi-title">Bus DC</span>
+                        <div class="kpi-heading-row">
+                            <span class="kpi-title">Bus DC</span>
+                            <span class="bus-trend-badge" title="Pendiente lineal del Bus DC respecto al tiempo">
+                                @if(($indicadores['bus_dc']['pendiente'] ?? 0) < 0)
+                                    ↓
+                                @elseif(($indicadores['bus_dc']['pendiente'] ?? 0) > 0)
+                                    ↑
+                                @else
+                                    →
+                                @endif
+                                {{ str_replace('TENDENCIA ', '', $indicadores['bus_dc']['interpretacion'] ?? 'ESTABLE') }}
+                                · {{ number_format($indicadores['bus_dc']['pendiente'] ?? 0, 2) }} V/min
+                            </span>
+                        </div>
 
                         <div class="kpi-value">
                             {{ number_format($kpis['bus_dc']['actual'], 2) }}
@@ -708,6 +756,9 @@
                             |
                             Max:
                             {{ number_format($kpis['bus_dc']['maximo'], 2) }}
+                            |
+                            Desv.:
+                            {{ number_format($kpis['bus_dc']['desviacion'], 2) }}
                         </div>
                     </div>
 
@@ -729,6 +780,9 @@
                             |
                             Max:
                             {{ number_format($kpis['torque']['maximo'], 2) }}
+                            |
+                            Desv.:
+                            {{ number_format($kpis['torque']['desviacion'], 2) }}
                         </div>
                     </div>
 
@@ -750,6 +804,9 @@
                             |
                             Max:
                             {{ number_format($kpis['temp_inversor']['maximo'], 2) }}
+                            |
+                            Desv.:
+                            {{ number_format($kpis['temp_inversor']['desviacion'], 2) }}
                         </div>
                     </div>
 
@@ -771,6 +828,9 @@
                             |
                             Max:
                             {{ number_format($kpis['temp_ambiente']['maximo'], 2) }}
+                            |
+                            Desv.:
+                            {{ number_format($kpis['temp_ambiente']['desviacion'], 2) }}
                         </div>
                     </div>
 
@@ -792,6 +852,23 @@
                             |
                             Max:
                             {{ number_format($kpis['velocidad']['maximo'], 2) }}
+                            |
+                            Desv.:
+                            {{ number_format($kpis['velocidad']['desviacion'], 2) }}
+                        </div>
+                    </div>
+
+                    {{-- DELTA T MÁXIMO SIMULTÁNEO --}}
+                    <div class="kpi-card delta-card">
+                        <span class="kpi-title">ΔT máximo simultáneo</span>
+
+                        <div class="kpi-value">
+                            {{ number_format($indicadores['delta_t_maximo'] ?? 0, 2) }}
+                            <small>°C</small>
+                        </div>
+
+                        <div class="delta-description">
+                            Máxima diferencia T. inversor − T. ambiente registrada en una misma muestra.
                         </div>
                     </div>
 
@@ -835,7 +912,7 @@
                 <p style="color:#64748b;margin:8px 0 0;">Periodos que alcanzaron Advertencia o Crítico.</p>
                 @if(count($eventos))
                     <div class="event-table-wrap"><table class="event-table">
-                        <thead><tr><th>Variable</th><th>Nivel</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Máximo</th></tr></thead>
+                        <thead><tr><th>Variable</th><th>Nivel</th><th>Inicio</th><th>Fin</th><th>Duración</th><th>Valor extremo</th></tr></thead>
                         <tbody>
                         @foreach($eventos as $evento)
                             <tr class="event-row">
@@ -940,8 +1017,8 @@
                     <button type="button" class="correlation-btn active" data-correlation="corriente_torque">
                         Corriente vs Torque
                     </button>
-                    <button type="button" class="correlation-btn" data-correlation="corriente_temp_inversor">
-                        Corriente vs Temp. inversor
+                    <button type="button" class="correlation-btn" data-correlation="corriente_bus_dc">
+                        Corriente vs Bus DC
                     </button>
                     <button type="button" class="correlation-btn" data-correlation="bus_dc_temp_inversor">
                         Bus DC vs Temp. inversor
@@ -1224,7 +1301,7 @@
 
         const configuracionCorrelaciones = {
             corriente_torque: { x:'corriente', y:'torque', tituloX:'Corriente', unidadX:'A', tituloY:'Torque', unidadY:'%' },
-            corriente_temp_inversor: { x:'corriente', y:'temp_inversor', tituloX:'Corriente', unidadX:'A', tituloY:'Temperatura inversor', unidadY:'%' },
+            corriente_bus_dc: { x:'corriente', y:'bus_dc', tituloX:'Corriente', unidadX:'A', tituloY:'Bus DC', unidadY:'V' },
             bus_dc_temp_inversor: { x:'bus_dc', y:'temp_inversor', tituloX:'Bus DC', unidadX:'V', tituloY:'Temperatura inversor', unidadY:'%' },
             temp_ambiente_temp_inversor: { x:'temp_ambiente', y:'temp_inversor', tituloX:'Temperatura ambiente', unidadX:'°C', tituloY:'Temperatura inversor', unidadY:'%' }
         };
@@ -1235,11 +1312,28 @@
         const correlationChart = new Chart(correlationCtx, {
             type: 'scatter',
             data: {
-                datasets: [{
-                    data: crearDatosCorrelacion(correlacionActual),
-                    pointRadius: 3,
-                    pointHoverRadius: 5
-                }]
+                datasets: [
+                    {
+                        type: 'scatter',
+                        data: crearDatosCorrelacion(correlacionActual),
+                        pointRadius: 2,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: 'rgba(14, 165, 233, 0.34)',
+                        pointBorderColor: 'rgba(14, 165, 233, 0.62)',
+                        pointBorderWidth: 1
+                    },
+                    {
+                        type: 'line',
+                        data: crearLineaTendencia(correlacionActual),
+                        parsing: false,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        borderWidth: 2,
+                        borderColor: 'rgba(15, 23, 42, 0.72)',
+                        tension: 0,
+                        fill: false
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -1248,6 +1342,9 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
+                        filter: function(context) {
+                            return context.datasetIndex === 0;
+                        },
                         callbacks: {
                             label: function(context) {
                                 const c = configuracionCorrelaciones[correlacionActual];
@@ -1269,6 +1366,36 @@
             return datosGrafica.map(item => ({ x: item[c.x], y: item[c.y] }));
         }
 
+        function crearLineaTendencia(nombre) {
+            const puntos = crearDatosCorrelacion(nombre);
+
+            if (puntos.length < 2) return [];
+
+            const promedioX = puntos.reduce((s, p) => s + p.x, 0) / puntos.length;
+            const promedioY = puntos.reduce((s, p) => s + p.y, 0) / puntos.length;
+
+            let numerador = 0;
+            let denominador = 0;
+
+            puntos.forEach(p => {
+                const dx = p.x - promedioX;
+                numerador += dx * (p.y - promedioY);
+                denominador += dx * dx;
+            });
+
+            if (denominador === 0) return [];
+
+            const pendiente = numerador / denominador;
+            const intercepto = promedioY - pendiente * promedioX;
+            const minX = Math.min(...puntos.map(p => p.x));
+            const maxX = Math.max(...puntos.map(p => p.x));
+
+            return [
+                { x: minX, y: pendiente * minX + intercepto },
+                { x: maxX, y: pendiente * maxX + intercepto }
+            ];
+        }
+
         function interpretarCorrelacion(r) {
             const valor = Math.abs(r);
             let intensidad;
@@ -1288,6 +1415,7 @@
             const c = configuracionCorrelaciones[nombre];
 
             correlationChart.data.datasets[0].data = crearDatosCorrelacion(nombre);
+            correlationChart.data.datasets[1].data = crearLineaTendencia(nombre);
             correlationChart.options.scales.x.title.text = c.tituloX + ' (' + c.unidadX + ')';
             correlationChart.options.scales.y.title.text = c.tituloY + ' (' + c.unidadY + ')';
             correlationChart.update();

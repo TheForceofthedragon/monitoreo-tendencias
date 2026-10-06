@@ -29,26 +29,27 @@ class DashboardController extends Controller
             session('umbrales_monitoreo', [])
         );
 
-        // Solo guardamos configuraciones completas y coherentes.
+        // Advertencia y Crítico pueden configurarse de forma independiente.
         foreach ($umbrales as $variable => $config) {
             $advertencia = $config['advertencia'] ?? null;
             $critico = $config['critico'] ?? null;
 
-            if ($advertencia === '' && $critico === '') {
+            if (($advertencia === null || $advertencia === '') && ($critico === null || $critico === '')) {
                 unset($umbrales[$variable]);
                 continue;
             }
 
-            if (
-                $advertencia !== null &&
-                $advertencia !== '' &&
-                $critico !== null &&
-                $critico !== '' &&
-                (float) $critico <= (float) $advertencia
-            ) {
-                return back()
-                    ->withInput()
-                    ->with('error', 'El umbral crítico debe ser mayor que el de advertencia.');
+            if ($advertencia !== null && $advertencia !== '' && $critico !== null && $critico !== '') {
+                $advertencia = (float) $advertencia;
+                $critico = (float) $critico;
+
+                if ($variable === 'bus_dc' && $critico >= $advertencia) {
+                    return back()->withInput()->with('error', 'En Bus DC, el umbral crítico debe ser menor que el de advertencia.');
+                }
+
+                if ($variable !== 'bus_dc' && $critico <= $advertencia) {
+                    return back()->withInput()->with('error', 'El umbral crítico debe ser mayor que el de advertencia.');
+                }
             }
         }
 
@@ -64,6 +65,7 @@ class DashboardController extends Controller
             return view('dashboard.index', [
                 'datos' => $resultado['datos'],
                 'kpis' => $resultado['kpis'],
+                'indicadores' => $resultado['indicadores'],
                 'graficas' => $resultado['graficas'],
                 'correlaciones' => $resultado['correlaciones'],
                 'semaforos' => $resultado['semaforos'],

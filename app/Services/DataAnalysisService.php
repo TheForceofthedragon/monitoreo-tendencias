@@ -63,6 +63,7 @@ class DataAnalysisService
         return [
             'datos' => $datos,
             'kpis' => $this->calcularKpis($datos),
+            'indicadores' => $this->calcularIndicadoresEspeciales($datos),
             'graficas' => $this->prepararGraficas($datos),
             'correlaciones' => $this->calcularCorrelaciones($datos),
             'semaforos' => $this->calcularSemaforos($datos, $umbrales),
@@ -111,11 +112,88 @@ class DataAnalysisService
     {
         $valores = array_column($datos, $campo);
 
+        $promedio = array_sum($valores) / count($valores);
+
         return [
             'actual' => end($valores),
-            'promedio' => array_sum($valores) / count($valores),
+            'promedio' => $promedio,
             'minimo' => min($valores),
             'maximo' => max($valores),
+            // Equivalente a STDEV.S del Excel: desviación estándar muestral.
+            'desviacion' => $this->desviacionEstandarMuestral($valores, $promedio),
+        ];
+    }
+
+    private function desviacionEstandarMuestral(array $valores, ?float $promedio = null): float
+    {
+        $n = count($valores);
+
+        if ($n < 2) {
+            return 0.0;
+        }
+
+        $promedio ??= array_sum($valores) / $n;
+        $sumaCuadrados = 0.0;
+
+        foreach ($valores as $valor) {
+            $sumaCuadrados += ($valor - $promedio) ** 2;
+        }
+
+        return sqrt($sumaCuadrados / ($n - 1));
+    }
+
+    private function calcularIndicadoresEspeciales(array $datos): array
+    {
+        // Excel: MAX(Tinv,i - Tamb,i), comparando ambas temperaturas
+        // en la misma muestra, no la diferencia entre máximos independientes.
+        $deltaTMaximo = null;
+
+        foreach ($datos as $fila) {
+            $delta = $fila['temp_inversor'] - $fila['temp_ambiente'];
+
+            if ($deltaTMaximo === null || $delta > $deltaTMaximo) {
+                $deltaTMaximo = $delta;
+            }
+        }
+
+        // Pendiente por regresión lineal del Bus DC respecto al tiempo,
+        // usando minutos, igual que la hoja de cálculo.
+        $tiempoInicial = $datos[0]['tiempo'];
+        $x = [];
+        $y = [];
+
+        foreach ($datos as $fila) {
+            $x[] = ($fila['tiempo'] - $tiempoInicial) / 60;
+            $y[] = $fila['bus_dc'];
+        }
+
+        $promedioX = array_sum($x) / count($x);
+        $promedioY = array_sum($y) / count($y);
+        $numerador = 0.0;
+        $denominador = 0.0;
+
+        foreach ($x as $i => $tiempoMin) {
+            $dx = $tiempoMin - $promedioX;
+            $numerador += $dx * ($y[$i] - $promedioY);
+            $denominador += $dx ** 2;
+        }
+
+        $pendiente = $denominador != 0.0 ? $numerador / $denominador : 0.0;
+
+        if ($pendiente < 0) {
+            $interpretacion = 'TENDENCIA DESCENDENTE';
+        } elseif ($pendiente > 0) {
+            $interpretacion = 'TENDENCIA ASCENDENTE';
+        } else {
+            $interpretacion = 'ESTABLE';
+        }
+
+        return [
+            'delta_t_maximo' => $deltaTMaximo ?? 0.0,
+            'bus_dc' => [
+                'pendiente' => $pendiente,
+                'interpretacion' => $interpretacion,
+            ],
         ];
     }
 
@@ -161,8 +239,8 @@ class DataAnalysisService
                 'interpretacion' => '',
             ],
 
-            'corriente_temp_inversor' => [
-                'r' => $this->pearson($datos, 'corriente', 'temp_inversor'),
+            'corriente_bus_dc' => [
+                'r' => $this->pearson($datos, 'corriente', 'bus_dc'),
                 'interpretacion' => '',
             ],
 
@@ -243,17 +321,7 @@ class DataAnalysisService
             $actual = (float) end($valores);
             $maximo = max($valores);
 
-            $estado = 'sin_configurar';
-
-            if ($advertencia !== null && $critico !== null) {
-                if ($actual >= $critico) {
-                    $estado = 'critico';
-                } elseif ($actual >= $advertencia) {
-                    $estado = 'advertencia';
-                } else {
-                    $estado = 'normal';
-                }
-            }
+            $estado = $this->clasificarValor($actual, $advertencia, $critico, $campo === 'bus_dc');
 
             $resultado[$campo] = [
                 'nombre' => $meta['nombre'],
@@ -288,7 +356,7 @@ class DataAnalysisService
             $advertencia = $this->normalizarUmbral($config['advertencia'] ?? null);
             $critico = $this->normalizarUmbral($config['critico'] ?? null);
 
-            if ($advertencia === null || $critico === null) {
+            if ($advertencia === null && $critico === null) {
                 continue;
             }
 
@@ -296,7 +364,7 @@ class DataAnalysisService
 
             foreach ($datos as $fila) {
                 $valor = (float) $fila[$campo];
-                $estado = $this->clasificarValor($valor, $advertencia, $critico);
+                $estado = $this->clasificarValor($valor, $advertencia, $critico, $campo === 'bus_dc');
                 $tiempo = round($fila['tiempo'] - $tiempoInicial, 2);
 
                 if ($estado === 'normal') {
@@ -327,7 +395,7 @@ class DataAnalysisService
                 }
 
                 $eventoActual['fin'] = $tiempo;
-                $eventoActual['maximo'] = max($eventoActual['maximo'], $valor);
+                $eventoActual['maximo'] = $campo === 'bus_dc' ? min($eventoActual['maximo'], $valor) : max($eventoActual['maximo'], $valor);
             }
 
             if ($eventoActual !== null) {
@@ -351,16 +419,18 @@ class DataAnalysisService
         return $evento;
     }
 
-    private function clasificarValor(float $valor, float $advertencia, float $critico): string
+    private function clasificarValor(float $valor, ?float $advertencia, ?float $critico, bool $descendente = false): string
     {
-        if ($valor >= $critico) {
-            return 'critico';
+        if ($advertencia === null && $critico === null) return 'sin_configurar';
+
+        if ($descendente) {
+            if ($critico !== null && $valor <= $critico) return 'critico';
+            if ($advertencia !== null && $valor <= $advertencia) return 'advertencia';
+            return 'normal';
         }
 
-        if ($valor >= $advertencia) {
-            return 'advertencia';
-        }
-
+        if ($critico !== null && $valor >= $critico) return 'critico';
+        if ($advertencia !== null && $valor >= $advertencia) return 'advertencia';
         return 'normal';
     }
 
