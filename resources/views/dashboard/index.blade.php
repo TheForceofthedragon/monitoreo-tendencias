@@ -738,7 +738,7 @@
                                     →
                                 @endif
                                 {{ str_replace('TENDENCIA ', '', $indicadores['bus_dc']['interpretacion'] ?? 'ESTABLE') }}
-                                · {{ number_format($indicadores['bus_dc']['pendiente'] ?? 0, 2) }} V/min
+                                · {{ number_format(($indicadores['bus_dc']['pendiente'] ?? 0) * 60, 4) }} V/h
                             </span>
                         </div>
 
