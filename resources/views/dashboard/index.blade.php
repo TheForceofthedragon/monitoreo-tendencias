@@ -792,7 +792,7 @@
 
                         <div class="kpi-value">
                             {{ number_format($kpis['temp_inversor']['actual'], 2) }}
-                            <small>%</small>
+                            <small>°C</small>
                         </div>
 
                         <div class="kpi-details">
@@ -1120,7 +1120,7 @@
 
             temp_inversor: {
                 titulo: 'Temperatura del inversor',
-                unidad: '%'
+                unidad: '°C'
             },
 
             temp_ambiente: {
@@ -1302,8 +1302,8 @@
         const configuracionCorrelaciones = {
             corriente_torque: { x:'corriente', y:'torque', tituloX:'Corriente', unidadX:'A', tituloY:'Torque', unidadY:'%' },
             corriente_bus_dc: { x:'corriente', y:'bus_dc', tituloX:'Corriente', unidadX:'A', tituloY:'Bus DC', unidadY:'V' },
-            bus_dc_temp_inversor: { x:'bus_dc', y:'temp_inversor', tituloX:'Bus DC', unidadX:'V', tituloY:'Temperatura inversor', unidadY:'%' },
-            temp_ambiente_temp_inversor: { x:'temp_ambiente', y:'temp_inversor', tituloX:'Temperatura ambiente', unidadX:'°C', tituloY:'Temperatura inversor', unidadY:'%' }
+            bus_dc_temp_inversor: { x:'bus_dc', y:'temp_inversor', tituloX:'Bus DC', unidadX:'V', tituloY:'Temperatura inversor', unidadY:'°C' },
+            temp_ambiente_temp_inversor: { x:'temp_ambiente', y:'temp_inversor', tituloX:'Temperatura ambiente', unidadX:'°C', tituloY:'Temperatura inversor', unidadY:'°C' }
         };
 
         let correlacionActual = 'corriente_torque';
